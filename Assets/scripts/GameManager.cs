@@ -23,6 +23,8 @@ public class GameManager : MonoBehaviour
     private float scaleFactor = 100;
     private float maxForce = 10;
 
+    public GameObject tt;
+
     // Use this for initialization
     void Start()
     {
@@ -34,6 +36,15 @@ public class GameManager : MonoBehaviour
         InitModel();
 
         StartCoroutine(GameLoop());
+
+        StartCoroutine(Test());
+    }
+
+    IEnumerator Test()
+    {
+        yield return new WaitForSeconds(0.5f);
+
+        tt.GetComponent<Rigidbody>().AddForce(new Vector3(0.5f, 0, 1) * 400);
     }
 
     void InitModel()
@@ -215,6 +226,6 @@ void FindPlace_Exit()
     //////////////////////////////////////state functions////////////////////////////
     public void TestHit()
     {
-        OnLoadForce(50);
+        whiteBall.GetComponent<Rigidbody>().AddForce(new Vector3(1, 0, 1) * 10);
     }
 }
