@@ -12,18 +12,18 @@ public class GameManager : MonoBehaviour
     private List<ARRaycastHit> rRaycastHits;
     private ARRaycastManager raycastManager;
     public GameObject model;
-    public GameObject line;
+    public GameObject linePerfab;
+    private GameObject lineInst;
     public GameObject debugHir;
     public GameObject debugInspector;
 
     private GameObject table;
     private GameObject whiteBall;
+    private Vector3 whiteBallForward;
 
     private float currentScale = 1;
     private float scaleFactor = 100;
     private float maxForce = 10;
-
-    public GameObject tt;
 
     // Use this for initialization
     void Start()
@@ -36,21 +36,13 @@ public class GameManager : MonoBehaviour
         InitModel();
 
         StartCoroutine(GameLoop());
-
-        StartCoroutine(Test());
-    }
-
-    IEnumerator Test()
-    {
-        yield return new WaitForSeconds(0.5f);
-
-        tt.GetComponent<Rigidbody>().AddForce(new Vector3(0.5f, 0, 1) * 400);
     }
 
     void InitModel()
     {
         table = Instantiate(model);
         whiteBall = GameObject.FindGameObjectWithTag("WhiteBall");
+        lineInst = Instantiate(linePerfab);
     }
 
     // Update is called once per frame
@@ -68,9 +60,11 @@ public class GameManager : MonoBehaviour
 
         yield return new WaitForSeconds(0.5f);
 
-        yield return StartCoroutine(FindPlace());
+        yield return StartCoroutine(Aim());
 
         yield return StartCoroutine(LoadForce());
+
+        yield return StartCoroutine(RollingBall());
 
     }
 
@@ -89,26 +83,12 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    IEnumerator HitBall()
+    IEnumerator Aim()
     {
-        while(fsm.State == GameConst.GameState.Aim)
+        while (fsm.State == GameConst.GameState.Aim)
         {
-            if(Input.touchCount == 1)
-            {
-                Debug.Log("add force to whiteball 0");
-                Touch touch = Input.GetTouch(0);
-                if(touch.phase == TouchPhase.Ended)
-                {
-                    Debug.Log("add force to whiteball 1");
-                    whiteBall.GetComponent<Rigidbody>().AddForce(new Vector3(0, 0, 1));
-                    fsm.ChangeState(GameConst.GameState.LoadForce);
-                    Debug.Log("add force to whiteball 2");
-                }
-            }
-
             yield return null;
         }
-
         yield return null;
     }
 
@@ -116,14 +96,26 @@ public class GameManager : MonoBehaviour
     {
         while(fsm.State == GameConst.GameState.LoadForce)
         {
-            if(CheckAllBallIsStop())
-            {
-                fsm.ChangeState(GameConst.GameState.Aim);
-            }
+            DrawBallLine(whiteBallForward);
+            yield return null;
         }
 
         yield return null;
     }
+
+    IEnumerator RollingBall()
+    {
+        while (fsm.State == GameConst.GameState.Rolling)
+        {
+            if (CheckAllBallIsStop())
+            {
+                fsm.ChangeState(GameConst.GameState.Aim);
+            }
+            yield return null;
+        }
+        yield return null;
+    }
+    
 
     bool CheckAllBallIsStop()
     {
@@ -134,26 +126,29 @@ public class GameManager : MonoBehaviour
         return false;
     }
 
-    void DrawBallLine(Vector3 to)
+    void ClearDrawLine()
+    {
+        lineInst.transform.position = new Vector3(1000, 1000, 1000);
+    }
+
+    void DrawBallLine(Vector3 dir)
     {
         Vector3 from = whiteBall.transform.position;
-        Vector3 dir = to - from;
         RaycastHit hitInfo;
-        if (Physics.Raycast(from, to, out hitInfo, 10))
+        if (Physics.Raycast(from, dir, out hitInfo, 10))
         {
             DrawLine(from, hitInfo.point);
-            DrawLine(hitInfo.point, Vector3.Reflect(dir, hitInfo.normal));   //reflect
-            
+            //DrawLine(hitInfo.point, Vector3.Reflect(dir, hitInfo.normal));   //reflect
         }
     }
 
     void DrawLine(Vector3 from, Vector3 to)
     {
         Vector3 lineDir = to - from;
-        line.transform.position = from + lineDir / 2f;
+        lineInst.transform.position = from + lineDir / 2f;
 
-        line.transform.forward = lineDir;
-        line.transform.localScale = new Vector3(line.transform.localScale.x, 1, lineDir.magnitude);
+        lineInst.transform.forward = lineDir;
+        lineInst.transform.localScale = new Vector3(lineInst.transform.localScale.x, 1, lineDir.magnitude);
     }
 
 
@@ -191,41 +186,69 @@ public class GameManager : MonoBehaviour
     /// </summary>
     void FindPlace_Enter()
     {
+        Debug.Log("FindPlace_Enter");
         GetComponent<ScaleAction>().enabled = true;
         GetComponent<LoadForceAction>().enabled = false;
     }
 
 void FindPlace_Exit()
     {
+        Debug.Log("FindPlace_Exit");
         GetComponent<ScaleAction>().enabled = false;
-        GetComponent<LoadForceAction>().enabled = true;
     }
 
 
     void Aim_Enter()
     {
-
+        Debug.Log("Aim_Enter");
     }
 
     void Aim_Exit()
     {
-
+        Debug.Log("Aim_Exit");
+        whiteBallForward = whiteBall.transform.position - Camera.main.transform.position;
+        whiteBallForward.y = 0;
     }
 
     void LoadForce_Enter()
     {
+        Debug.Log("LoadForce_Enter");
         GetComponent<LoadForceAction>().enabled = true;
     }
 
     void LoadForce_Exit()
     {
+        Debug.Log("LoadForce_Exit");
         GetComponent<LoadForceAction>().enabled = false;
     }
 
+    void Rolling_Enter()
+    {
+        Debug.Log("Rolling_Enter");
+        ClearDrawLine();
+    }
+
+    void Rolling_Exit()
+    {
+        Debug.Log("Rolling_Exit");
+        
+    }
 
     //////////////////////////////////////state functions////////////////////////////
     public void TestHit()
     {
         whiteBall.GetComponent<Rigidbody>().AddForce(new Vector3(1, 0, 1) * 10);
+    }
+
+    public void NextState()
+    {
+        switch(fsm.State)
+        {
+            case GameConst.GameState.FindPlace: fsm.ChangeState(GameConst.GameState.Aim); break;
+            case GameConst.GameState.Aim: fsm.ChangeState(GameConst.GameState.LoadForce); break;
+            case GameConst.GameState.LoadForce: TestHit(); fsm.ChangeState(GameConst.GameState.Rolling); break;
+            case GameConst.GameState.Rolling:  break;
+            case GameConst.GameState.GameOver:  break;
+        }
     }
 }
