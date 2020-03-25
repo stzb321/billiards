@@ -6,14 +6,14 @@ public class LoadForceAction : MonoBehaviour
 {
     public GameManager gameManager;
     public GameObject UIObject;
-    public Slider slider;
+    public Slider forceSlider;
     private float minForce = 2f;
     private float sliderFactor = 0.3f;
 
     // Use this for in i tialization
     void Start()
     {
-
+        
     }
 
     private void OnEnable()
@@ -38,9 +38,9 @@ public class LoadForceAction : MonoBehaviour
         
         if (touch.phase == TouchPhase.Ended)
         {
-            if (slider.value <= minForce)
+            if (forceSlider.value <= minForce)
                 return;
-            gameManager.OnLoadForce(slider.value);
+            gameManager.OnLoadForce(forceSlider.value);
         }else if(touch.phase == TouchPhase.Moved)
         {
             UpdateForce(touch.deltaPosition.x * sliderFactor);
@@ -49,6 +49,6 @@ public class LoadForceAction : MonoBehaviour
 
     void UpdateForce(float delta)
     {
-        slider.value += delta;
+        forceSlider.value += delta;
     }
 }

@@ -4,6 +4,7 @@ using UnityEngine.XR.ARFoundation;
 using System.Collections.Generic;
 using UnityEngine.XR.ARSubsystems;
 using MonsterLove.StateMachine;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
@@ -11,6 +12,7 @@ public class GameManager : MonoBehaviour
     private ARSessionOrigin sessionOrigin;
     private List<ARRaycastHit> rRaycastHits;
     private ARRaycastManager raycastManager;
+    private AREnvironmentProbeManager environmentProbeManager;
     public GameObject model;
     public GameObject linePerfab;
     private GameObject lineInst;
@@ -20,6 +22,7 @@ public class GameManager : MonoBehaviour
     private GameObject table;
     private GameObject whiteBall;
     private Vector3 whiteBallForward;
+    private GameObject refGO;
 
     private float currentScale = 1;
     private float scaleFactor = 100;
@@ -31,7 +34,9 @@ public class GameManager : MonoBehaviour
         fsm = StateMachine<GameConst.GameState>.Initialize(this);
         sessionOrigin = GetComponent<ARSessionOrigin>();
         raycastManager = GetComponent<ARRaycastManager>();
+        environmentProbeManager = GetComponent<AREnvironmentProbeManager>();
         rRaycastHits = new List<ARRaycastHit>();
+        refGO = GameObject.Find("ref");
 
         InitModel();
 
@@ -135,8 +140,9 @@ public class GameManager : MonoBehaviour
     {
         Vector3 from = whiteBall.transform.position;
         RaycastHit hitInfo;
-        if (Physics.Raycast(from, dir, out hitInfo, 10))
+        if(whiteBall.GetComponent<Rigidbody>().SweepTest(dir, out hitInfo, 10))
         {
+            Debug.Log(hitInfo.collider.gameObject.name);
             DrawLine(from, hitInfo.point);
             //DrawLine(hitInfo.point, Vector3.Reflect(dir, hitInfo.normal));   //reflect
         }
@@ -195,6 +201,8 @@ void FindPlace_Exit()
     {
         Debug.Log("FindPlace_Exit");
         GetComponent<ScaleAction>().enabled = false;
+        //Pose pose = new Pose(table.transform.position, Quaternion.Euler(table.transform.rotation.x, table.transform.rotation.y, table.transform.rotation.z));
+        //environmentProbeManager.AddEnvironmentProbe(pose, Vector3.one, Vector3.one);
     }
 
 
@@ -206,7 +214,7 @@ void FindPlace_Exit()
     void Aim_Exit()
     {
         Debug.Log("Aim_Exit");
-        whiteBallForward = whiteBall.transform.position - Camera.main.transform.position;
+        whiteBallForward =  whiteBall.transform.position - refGO.transform.position;
         whiteBallForward.y = 0;
     }
 
@@ -240,6 +248,14 @@ void FindPlace_Exit()
         whiteBall.GetComponent<Rigidbody>().AddForce(new Vector3(1, 0, 1) * 10);
     }
 
+    public void OnRotateBallStick(Slider slider)
+    {
+        //whiteBallForward = new Vector3(whiteBallForward.x, Mathf.Lerp(0, 360, slider.value), whiteBallForward.z);
+        whiteBallForward = new Vector3(Mathf.Lerp(0, 360, slider.value), whiteBallForward.y, whiteBallForward.z);
+        //whiteBallForward = new Vector3(whiteBallForward.x, whiteBallForward.y, Mathf.Lerp(0, 360, slider.value));
+        refGO.transform.rotation = Quaternion.Euler(whiteBallForward);
+    }
+
     public void NextState()
     {
         switch(fsm.State)
@@ -249,6 +265,14 @@ void FindPlace_Exit()
             case GameConst.GameState.LoadForce: TestHit(); fsm.ChangeState(GameConst.GameState.Rolling); break;
             case GameConst.GameState.Rolling:  break;
             case GameConst.GameState.GameOver:  break;
+        }
+    }
+
+    private void OnDrawGizmos()
+    {
+        if(fsm.State == GameConst.GameState.LoadForce)
+        {
+            Gizmos.DrawRay(whiteBall.transform.position, whiteBallForward);
         }
     }
 }
