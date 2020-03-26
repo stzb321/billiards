@@ -21,6 +21,7 @@ public class GameManager : MonoBehaviour
 
     private GameObject table;
     private GameObject whiteBall;
+    private Vector3 originForward;
     private Vector3 whiteBallForward;
     private GameObject refGO;
 
@@ -65,12 +66,19 @@ public class GameManager : MonoBehaviour
 
         yield return new WaitForSeconds(0.5f);
 
-        yield return StartCoroutine(Aim());
+        while(!IsGameOver())
+        {
+            yield return StartCoroutine(Aim());
 
-        yield return StartCoroutine(LoadForce());
+            yield return StartCoroutine(LoadForce());
 
-        yield return StartCoroutine(RollingBall());
+            yield return StartCoroutine(RollingBall());
+        }
+    }
 
+    bool IsGameOver()
+    {
+        return false;
     }
 
     IEnumerator FindPlace()
@@ -142,7 +150,6 @@ public class GameManager : MonoBehaviour
         RaycastHit hitInfo;
         if(whiteBall.GetComponent<Rigidbody>().SweepTest(dir, out hitInfo, 10))
         {
-            Debug.Log(hitInfo.collider.gameObject.name);
             DrawLine(from, hitInfo.point);
             //DrawLine(hitInfo.point, Vector3.Reflect(dir, hitInfo.normal));   //reflect
         }
@@ -216,6 +223,7 @@ void FindPlace_Exit()
         Debug.Log("Aim_Exit");
         whiteBallForward =  whiteBall.transform.position - refGO.transform.position;
         whiteBallForward.y = 0;
+        originForward = whiteBallForward;
     }
 
     void LoadForce_Enter()
@@ -250,10 +258,14 @@ void FindPlace_Exit()
 
     public void OnRotateBallStick(Slider slider)
     {
-        //whiteBallForward = new Vector3(whiteBallForward.x, Mathf.Lerp(0, 360, slider.value), whiteBallForward.z);
-        whiteBallForward = new Vector3(Mathf.Lerp(0, 360, slider.value), whiteBallForward.y, whiteBallForward.z);
-        //whiteBallForward = new Vector3(whiteBallForward.x, whiteBallForward.y, Mathf.Lerp(0, 360, slider.value));
-        refGO.transform.rotation = Quaternion.Euler(whiteBallForward);
+        whiteBallForward = Quaternion.Euler(0, Mathf.Lerp(0, 360, slider.value), 0) * originForward;
+    }
+
+    public void OnHitClick(Slider slider)
+    {
+        int maxForce = 10;
+        whiteBall.GetComponent<Rigidbody>().AddForce(whiteBallForward * maxForce * slider.value);
+        fsm.ChangeState(GameConst.GameState.Rolling);
     }
 
     public void NextState()
