@@ -8,21 +8,22 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
-    private StateMachine<GameConst.GameState> fsm;
+    [HideInInspector]
+    public StateMachine<GameConst.GameState> fsm;
     private ARSessionOrigin sessionOrigin;
     private List<ARRaycastHit> rRaycastHits;
     private ARRaycastManager raycastManager;
     private AREnvironmentProbeManager environmentProbeManager;
     public GameObject model;
-    public GameObject linePerfab;
-    private GameObject lineInst;
     public GameObject debugHir;
     public GameObject debugInspector;
 
     private GameObject table;
-    private GameObject whiteBall;
+    [HideInInspector]
+    public GameObject whiteBall;
     private Vector3 originForward;
-    private Vector3 whiteBallForward;
+    [HideInInspector]
+    public Vector3 whiteBallForward;
     private GameObject refGO;
 
     private float currentScale = 1;
@@ -48,13 +49,18 @@ public class GameManager : MonoBehaviour
     {
         table = Instantiate(model);
         whiteBall = GameObject.FindGameObjectWithTag("WhiteBall");
-        lineInst = Instantiate(linePerfab);
     }
 
     // Update is called once per frame
     void Update()
     {
         
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        Debug.Log(string.Format("OnCollisionEnter {0}", collision.gameObject.name));
+        Handheld.Vibrate();
     }
 
     IEnumerator GameLoop()
@@ -109,7 +115,6 @@ public class GameManager : MonoBehaviour
     {
         while(fsm.State == GameConst.GameState.LoadForce)
         {
-            DrawBallLine(whiteBallForward);
             yield return null;
         }
 
@@ -137,31 +142,6 @@ public class GameManager : MonoBehaviour
             return true;
         }
         return false;
-    }
-
-    void ClearDrawLine()
-    {
-        lineInst.transform.position = new Vector3(1000, 1000, 1000);
-    }
-
-    void DrawBallLine(Vector3 dir)
-    {
-        Vector3 from = whiteBall.transform.position;
-        RaycastHit hitInfo;
-        if(whiteBall.GetComponent<Rigidbody>().SweepTest(dir, out hitInfo, 10))
-        {
-            DrawLine(from, hitInfo.point);
-            //DrawLine(hitInfo.point, Vector3.Reflect(dir, hitInfo.normal));   //reflect
-        }
-    }
-
-    void DrawLine(Vector3 from, Vector3 to)
-    {
-        Vector3 lineDir = to - from;
-        lineInst.transform.position = from + lineDir / 2f;
-
-        lineInst.transform.forward = lineDir;
-        lineInst.transform.localScale = new Vector3(lineInst.transform.localScale.x, 1, lineDir.magnitude);
     }
 
 
@@ -229,19 +209,20 @@ void FindPlace_Exit()
     void LoadForce_Enter()
     {
         Debug.Log("LoadForce_Enter");
+        GetComponent<ReflectLine>().enabled = true;
         GetComponent<LoadForceAction>().enabled = true;
     }
 
     void LoadForce_Exit()
     {
         Debug.Log("LoadForce_Exit");
+        GetComponent<ReflectLine>().enabled = false;
         GetComponent<LoadForceAction>().enabled = false;
     }
 
     void Rolling_Enter()
     {
         Debug.Log("Rolling_Enter");
-        ClearDrawLine();
     }
 
     void Rolling_Exit()

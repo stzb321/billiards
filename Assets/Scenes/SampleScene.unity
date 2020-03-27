@@ -424,6 +424,7 @@ GameObject:
   - component: {fileID: 638382650}
   - component: {fileID: 638382648}
   - component: {fileID: 638382651}
+  - component: {fileID: 638382652}
   m_Layer: 0
   m_Name: AR Session Origin
   m_TagString: Untagged
@@ -513,10 +514,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   model: {fileID: 2130787545996907834, guid: 3b6a38d4f75e14130a014ba57876055b, type: 3}
-  linePerfab: {fileID: 5884679412881765619, guid: 9d085aaabda381e49bcaa426cddd0a7c,
-    type: 3}
   debugHir: {fileID: 346934970}
   debugInspector: {fileID: 343159736}
+  whiteBall: {fileID: 0}
+  whiteBallForward: {x: 0, y: 0, z: 0}
 --- !u!114 &638382651
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -532,6 +533,21 @@ MonoBehaviour:
   gameManager: {fileID: 638382650}
   UIObject: {fileID: 903336048}
   forceSlider: {fileID: 332192675}
+--- !u!114 &638382652
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 638382644}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da4420e89d96b4146a63ac9d6b9f414a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  linePerfab: {fileID: 5884679412881765619, guid: 9d085aaabda381e49bcaa426cddd0a7c,
+    type: 3}
+  gameManager: {fileID: 638382650}
 --- !u!1 &655520381
 GameObject:
   m_ObjectHideFlags: 0
@@ -731,10 +747,10 @@ Light:
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 0
+    m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
-    m_Strength: 1
+    m_Strength: 0.37
     m_Bias: 0.05
     m_NormalBias: 0.4
     m_NearPlane: 0.2
