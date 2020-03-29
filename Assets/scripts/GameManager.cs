@@ -21,10 +21,13 @@ public class GameManager : MonoBehaviour
     private GameObject table;
     [HideInInspector]
     public GameObject whiteBall;
+    [HideInInspector]
+    public Vector3 whiteBallPos;
     private Vector3 originForward;
     [HideInInspector]
     public Vector3 whiteBallForward;
     private GameObject refGO;
+    public GameObject stick;
 
     private float currentScale = 1;
     private float scaleFactor = 100;
@@ -49,18 +52,13 @@ public class GameManager : MonoBehaviour
     {
         table = Instantiate(model);
         whiteBall = GameObject.FindGameObjectWithTag("WhiteBall");
+        whiteBallPos = whiteBall.transform.position;
     }
 
     // Update is called once per frame
     void Update()
     {
         
-    }
-
-    private void OnCollisionEnter(Collision collision)
-    {
-        Debug.Log(string.Format("OnCollisionEnter {0}", collision.gameObject.name));
-        Handheld.Vibrate();
     }
 
     IEnumerator GameLoop()
@@ -106,6 +104,17 @@ public class GameManager : MonoBehaviour
     {
         while (fsm.State == GameConst.GameState.Aim)
         {
+            RaycastHit hitInfo;
+            if(Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hitInfo))
+            {
+                if(hitInfo.collider.gameObject.name == "whiteball")
+                {
+                    //fsm.change
+                }
+            }
+
+
+
             yield return null;
         }
         yield return null;
@@ -211,6 +220,9 @@ void FindPlace_Exit()
         Debug.Log("LoadForce_Enter");
         GetComponent<ReflectLine>().enabled = true;
         GetComponent<LoadForceAction>().enabled = true;
+        stick.transform.forward = whiteBallForward;
+        stick.transform.Rotate(new Vector3(6, 0, 0));
+        stick.transform.position = whiteBall.transform.position;
     }
 
     void LoadForce_Exit()
@@ -240,12 +252,14 @@ void FindPlace_Exit()
     public void OnRotateBallStick(Slider slider)
     {
         whiteBallForward = Quaternion.Euler(0, Mathf.Lerp(0, 360, slider.value), 0) * originForward;
+        stick.transform.forward = whiteBallForward;
+        stick.transform.Rotate(new Vector3(6, 0, 0));
     }
 
-    public void OnHitClick(Slider slider)
+    public void OnHitClick(float value)
     {
-        int maxForce = 10;
-        whiteBall.GetComponent<Rigidbody>().AddForce(whiteBallForward * maxForce * slider.value);
+        int maxForce = 300;
+        whiteBall.GetComponent<Rigidbody>().AddForce(whiteBallForward * maxForce * value);
         fsm.ChangeState(GameConst.GameState.Rolling);
     }
 
@@ -263,9 +277,9 @@ void FindPlace_Exit()
 
     private void OnDrawGizmos()
     {
-        if(fsm.State == GameConst.GameState.LoadForce)
-        {
-            Gizmos.DrawRay(whiteBall.transform.position, whiteBallForward);
-        }
+        //if(fsm!=null && fsm.State == GameConst.GameState.LoadForce)
+        //{
+        //    Gizmos.DrawRay(whiteBall.transform.position, whiteBallForward);
+        //}
     }
 }

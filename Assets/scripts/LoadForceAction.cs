@@ -1,29 +1,38 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
+using DG.Tweening;
 
 public class LoadForceAction : MonoBehaviour
 {
     public GameManager gameManager;
     public GameObject UIObject;
+    public GameObject realStick;
     public Slider forceSlider;
+    private Vector3 originStickPos;
     private float minForce = 2f;
     private float sliderFactor = 0.3f;
+    public float speed = 5;
+    private float maxDistance = 10;
+    private bool hit = false;
 
     // Use this for in i tialization
     void Start()
     {
-        
+        originStickPos = realStick.transform.localPosition;
     }
 
     private void OnEnable()
     {
+        hit = false;
         UIObject?.SetActive(true);
+        realStick.SetActive(true);
     }
 
     private void OnDisable()
     {
         UIObject?.SetActive(false);
+        realStick.SetActive(false);
     }
 
     // Update is called once per frame
@@ -50,5 +59,34 @@ public class LoadForceAction : MonoBehaviour
     void UpdateForce(float delta)
     {
         forceSlider.value += delta;
+    }
+
+    public void OnDragEnd(Slider slider)
+    {
+        float val = slider.value;
+        if(val > 0.1)
+        {
+            HitTheBall(slider);
+        }
+        slider.value = 0;
+    }
+
+    public void OnValueChange(Slider slider)
+    {
+        if (!hit)
+        {
+            realStick.transform.localPosition = (realStick.transform.up * maxDistance * slider.value) + originStickPos;
+        }
+    }
+
+    void HitTheBall(Slider slider)
+    {
+        hit = true;
+        float val = slider.value;
+        //realStick.transform.DOMove(originStickPos, 0.5f);
+        realStick.transform.DOLocalMove(originStickPos, 0.1f).onComplete = ()=>
+        {
+            gameManager.OnHitClick(val);
+        };
     }
 }

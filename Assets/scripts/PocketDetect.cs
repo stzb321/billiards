@@ -8,7 +8,7 @@ public class PocketDetect : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        gameManager = GameObject.FindGameObjectWithTag("ArSession").GetComponent<GameManager>();
     }
 
     // Update is called once per frame
@@ -19,12 +19,16 @@ public class PocketDetect : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-
+        Debug.Log(collision.gameObject.name);
 
 
         if(collision.gameObject == gameManager.whiteBall)
         {
-
+            collision.gameObject.transform.position = gameManager.whiteBallPos;
+        }
+        else
+        {
+            Destroy(collision.gameObject);
         }
     }
 }
