@@ -38,22 +38,22 @@ public class LoadForceAction : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.touchCount != 1)
-        {
-            return;
-        }
+        //if (Input.touchCount != 1)
+        //{
+        //    return;
+        //}
 
-        Touch touch = Input.GetTouch(0);
+        //Touch touch = Input.GetTouch(0);
         
-        if (touch.phase == TouchPhase.Ended)
-        {
-            if (forceSlider.value <= minForce)
-                return;
-            gameManager.OnLoadForce(forceSlider.value);
-        }else if(touch.phase == TouchPhase.Moved)
-        {
-            UpdateForce(touch.deltaPosition.x * sliderFactor);
-        }
+        //if (touch.phase == TouchPhase.Ended)
+        //{
+        //    if (forceSlider.value <= minForce)
+        //        return;
+        //    gameManager.OnLoadForce(forceSlider.value);
+        //}else if(touch.phase == TouchPhase.Moved)
+        //{
+        //    UpdateForce(touch.deltaPosition.x * sliderFactor);
+        //}
     }
 
     void UpdateForce(float delta)
@@ -75,7 +75,7 @@ public class LoadForceAction : MonoBehaviour
     {
         if (!hit)
         {
-            realStick.transform.localPosition = (realStick.transform.up * maxDistance * slider.value) + originStickPos;
+            realStick.transform.localPosition = (-realStick.transform.forward * maxDistance * slider.value) + originStickPos;
         }
     }
 
@@ -83,7 +83,6 @@ public class LoadForceAction : MonoBehaviour
     {
         hit = true;
         float val = slider.value;
-        //realStick.transform.DOMove(originStickPos, 0.5f);
         realStick.transform.DOLocalMove(originStickPos, 0.1f).onComplete = ()=>
         {
             gameManager.OnHitClick(val);

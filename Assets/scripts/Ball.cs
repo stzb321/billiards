@@ -19,6 +19,9 @@ public class Ball : MonoBehaviour
     private void OnCollisionEnter(Collision collision)
     {
         Debug.Log(string.Format("OnCollisionEnter {0}", collision.gameObject.name));
-        Handheld.Vibrate();
+        if(collision.gameObject.name == "whiteball")
+        {
+            Handheld.Vibrate();
+        }
     }
 }

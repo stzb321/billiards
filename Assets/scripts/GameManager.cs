@@ -51,6 +51,7 @@ public class GameManager : MonoBehaviour
     void InitModel()
     {
         table = Instantiate(model);
+        table.transform.position = new Vector3(999, 999, 999);
         whiteBall = GameObject.FindGameObjectWithTag("WhiteBall");
         whiteBallPos = whiteBall.transform.position;
     }
@@ -109,7 +110,7 @@ public class GameManager : MonoBehaviour
             {
                 if(hitInfo.collider.gameObject.name == "whiteball")
                 {
-                    //fsm.change
+                    fsm.ChangeState(GameConst.GameState.LoadForce);
                 }
             }
 
@@ -124,6 +125,10 @@ public class GameManager : MonoBehaviour
     {
         while(fsm.State == GameConst.GameState.LoadForce)
         {
+            //whiteBallForward = Camera.main.transform.forward;
+            whiteBallForward.y = Camera.main.transform.forward.y;
+            stick.transform.forward = whiteBallForward;
+            stick.transform.Rotate(new Vector3(6, 0, 0));
             yield return null;
         }
 
@@ -199,6 +204,7 @@ void FindPlace_Exit()
         GetComponent<ScaleAction>().enabled = false;
         //Pose pose = new Pose(table.transform.position, Quaternion.Euler(table.transform.rotation.x, table.transform.rotation.y, table.transform.rotation.z));
         //environmentProbeManager.AddEnvironmentProbe(pose, Vector3.one, Vector3.one);
+        table.GetComponent<TableAction>().enabled = true;
     }
 
 
@@ -220,8 +226,8 @@ void FindPlace_Exit()
         Debug.Log("LoadForce_Enter");
         GetComponent<ReflectLine>().enabled = true;
         GetComponent<LoadForceAction>().enabled = true;
-        stick.transform.forward = whiteBallForward;
-        stick.transform.Rotate(new Vector3(6, 0, 0));
+        //stick.transform.forward = whiteBallForward;
+        //stick.transform.Rotate(new Vector3(6, 0, 0));
         stick.transform.position = whiteBall.transform.position;
     }
 

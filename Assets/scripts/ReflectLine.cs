@@ -48,7 +48,7 @@ public class ReflectLine : MonoBehaviour
         if (whiteBall.GetComponent<Rigidbody>().SweepTest(dir, out hitInfo, 1000))
         {
             DrawLine(lineDir, from, hitInfo.point);
-            DrawLine(lineReflect, hitInfo.point, Vector3.Reflect(dir, hitInfo.normal).normalized);   //reflect
+            //DrawLine(lineReflect, hitInfo.point, Vector3.Reflect(dir, hitInfo.normal).normalized);   //reflect
         }
     }
 
