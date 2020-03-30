@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657838, g: 0.49641234, b: 0.57481676, a: 1}
+  m_IndirectSpecularColor: {r: 0.4465785, g: 0.49641222, b: 0.57481694, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -96,6 +96,7 @@ LightmapSettings:
     m_PVRFilteringAtrousPositionSigmaAO: 1
     m_ExportTrainingData: 0
     m_TrainingDataDestination: TrainingData
+    m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 0}
   m_UseShadowmask: 1
 --- !u!196 &4
@@ -328,7 +329,7 @@ Transform:
   m_GameObject: {fileID: 638382644}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 100, y: 100, z: 100}
+  m_LocalScale: {x: 1000, y: 1000, z: 1000}
   m_Children:
   - {fileID: 1329434508}
   m_Father: {fileID: 0}
@@ -346,7 +347,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 73a025b51106444e18fb408fde19ac53, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_AutomaticPlacement: 0
+  m_AutomaticPlacement: 1
   m_EnvironmentTextureFilterMode: 2
   m_EnvironmentTextureHDR: 1
   m_DebugPrefab: {fileID: 0}
@@ -394,6 +395,14 @@ MonoBehaviour:
   whiteBallPos: {x: 0, y: 0, z: 0}
   whiteBallForward: {x: 0, y: 0, z: 0}
   stick: {fileID: 1430838850}
+  tableSpMaterials:
+  - {fileID: 2100000, guid: ba9bc3f7f0632e549b213caf0660f910, type: 2}
+  - {fileID: 2100000, guid: ba9bc3f7f0632e549b213caf0660f910, type: 2}
+  - {fileID: 2100000, guid: ba9bc3f7f0632e549b213caf0660f910, type: 2}
+  - {fileID: 2100000, guid: ba9bc3f7f0632e549b213caf0660f910, type: 2}
+  - {fileID: 2100000, guid: ba9bc3f7f0632e549b213caf0660f910, type: 2}
+  - {fileID: 2100000, guid: ba9bc3f7f0632e549b213caf0660f910, type: 2}
+  - {fileID: 2100000, guid: ba9bc3f7f0632e549b213caf0660f910, type: 2}
 --- !u!114 &638382651
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -615,8 +624,9 @@ Light:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 837902090}
   m_Enabled: 1
-  serializedVersion: 9
+  serializedVersion: 10
   m_Type: 1
+  m_Shape: 0
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Intensity: 1
   m_Range: 10
@@ -1066,7 +1076,7 @@ Camera:
     width: 1
     height: 1
   near clip plane: 0.1
-  far clip plane: 1000
+  far clip plane: 500
   field of view: 60
   orthographic: 0
   orthographic size: 5
@@ -1836,7 +1846,7 @@ PrefabInstance:
     - target: {fileID: 224431128458639770, guid: 4d8c6c9fba0e46f489b21fd7d92d739d,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.0028381348
+      value: 0.0028076172
       objectReference: {fileID: 0}
     - target: {fileID: 224431128458639770, guid: 4d8c6c9fba0e46f489b21fd7d92d739d,
         type: 3}
@@ -2096,7 +2106,7 @@ PrefabInstance:
     - target: {fileID: 224880000733725854, guid: d39ad26c554f1a04d870956f7fac6fd8,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.0028381348
+      value: 0.0028076172
       objectReference: {fileID: 0}
     - target: {fileID: 224880000733725854, guid: d39ad26c554f1a04d870956f7fac6fd8,
         type: 3}

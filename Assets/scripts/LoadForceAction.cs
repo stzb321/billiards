@@ -12,11 +12,10 @@ public class LoadForceAction : MonoBehaviour
     private Vector3 originStickPos;
     private float minForce = 2f;
     private float sliderFactor = 0.3f;
-    public float speed = 5;
     private float maxDistance = 10;
     private bool hit = false;
 
-    // Use this for in i tialization
+    // Use this for initialization
     void Start()
     {
         originStickPos = realStick.transform.localPosition;

@@ -11,8 +11,9 @@ public class GameManager : MonoBehaviour
     [HideInInspector]
     public StateMachine<GameConst.GameState> fsm;
     private ARSessionOrigin sessionOrigin;
-    private List<ARRaycastHit> rRaycastHits;
+    private List<ARRaycastHit> arRaycastHits;
     private ARRaycastManager raycastManager;
+    private RaycastHit[] raycastHits;
     private AREnvironmentProbeManager environmentProbeManager;
     public GameObject model;
     public GameObject debugHir;
@@ -32,6 +33,10 @@ public class GameManager : MonoBehaviour
     private float currentScale = 1;
     private float scaleFactor = 100;
     private float maxForce = 10;
+    private Vector3 boxSize = new Vector3(0.1f, 0.1f, 0.1f);
+    private Material[] oldMaterials;
+    public Material[] tableSpMaterials;
+    public float tableMaxDistance;
 
     // Use this for initialization
     void Start()
@@ -40,7 +45,8 @@ public class GameManager : MonoBehaviour
         sessionOrigin = GetComponent<ARSessionOrigin>();
         raycastManager = GetComponent<ARRaycastManager>();
         environmentProbeManager = GetComponent<AREnvironmentProbeManager>();
-        rRaycastHits = new List<ARRaycastHit>();
+        arRaycastHits = new List<ARRaycastHit>();
+        raycastHits = new RaycastHit[10];
         refGO = GameObject.Find("ref");
 
         InitModel();
@@ -52,6 +58,7 @@ public class GameManager : MonoBehaviour
     {
         table = Instantiate(model);
         table.transform.position = new Vector3(999, 999, 999);
+        oldMaterials = table.transform.Find("table").GetComponent<Renderer>().materials;
         whiteBall = GameObject.FindGameObjectWithTag("WhiteBall");
         whiteBallPos = whiteBall.transform.position;
     }
@@ -91,10 +98,11 @@ public class GameManager : MonoBehaviour
         while(fsm.State == GameConst.GameState.FindPlace)
         {
             Vector2 center = Camera.main.ViewportToScreenPoint(new Vector3(0.5f, 0.5f, 0));
-            if (raycastManager.Raycast(center, rRaycastHits, TrackableType.Planes))
+            if (raycastManager.Raycast(center, arRaycastHits, TrackableType.Planes))
             {
-                ARRaycastHit hit = rRaycastHits[0];
-                table.transform.position = hit.pose.position;
+                ARRaycastHit hit = arRaycastHits[0];
+                Vector3 pos = new Vector3(hit.pose.position.x, hit.pose.position.y, Mathf.Clamp(hit.pose.position.z - Camera.main.transform.position.z, -tableMaxDistance, tableMaxDistance));
+                table.transform.position = pos;
             }
 
             yield return null;
@@ -105,18 +113,33 @@ public class GameManager : MonoBehaviour
     {
         while (fsm.State == GameConst.GameState.Aim)
         {
-            RaycastHit hitInfo;
-            if(Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hitInfo))
+            //RaycastHit hitInfo;
+            //if(Physics.BoxCast(Camera.main.transform.position, boxSize, Camera.main.transform.forward))
+            //{
+
+            //}
+
+            int cnt = Physics.BoxCastNonAlloc(Camera.main.transform.position, boxSize, Camera.main.transform.forward, raycastHits);
+            for (int i = 0; i < cnt; i++)
             {
-                if(hitInfo.collider.gameObject.name == "whiteball")
+                var hitInfo = raycastHits[i];
+                if (hitInfo.collider.gameObject.name == "whiteball")
                 {
                     fsm.ChangeState(GameConst.GameState.LoadForce);
                 }
             }
 
+            //if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hitInfo))
+            //{
+            //    if(hitInfo.collider.gameObject.name == "whiteball")
+            //    {
+            //        fsm.ChangeState(GameConst.GameState.LoadForce);
+            //    }
+            //}
 
 
-            yield return null;
+
+            yield return new WaitForSeconds(0.1f);
         }
         yield return null;
     }
@@ -196,15 +219,21 @@ public class GameManager : MonoBehaviour
         Debug.Log("FindPlace_Enter");
         GetComponent<ScaleAction>().enabled = true;
         GetComponent<LoadForceAction>().enabled = false;
+
+        // 设置特殊材质
+        table.transform.Find("table").GetComponent<Renderer>().materials = tableSpMaterials;
     }
 
 void FindPlace_Exit()
     {
         Debug.Log("FindPlace_Exit");
         GetComponent<ScaleAction>().enabled = false;
-        //Pose pose = new Pose(table.transform.position, Quaternion.Euler(table.transform.rotation.x, table.transform.rotation.y, table.transform.rotation.z));
-        //environmentProbeManager.AddEnvironmentProbe(pose, Vector3.one, Vector3.one);
         table.GetComponent<TableAction>().enabled = true;
+        //Pose pose = new Pose(table.transform.position, table.transform.rotation);
+        //environmentProbeManager.AddEnvironmentProbe(pose, Vector3.one, Vector3.one*3);
+
+        // 设置回原本材质
+        table.transform.Find("table").GetComponent<Renderer>().materials = oldMaterials;
     }
 
 
