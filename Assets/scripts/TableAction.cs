@@ -24,7 +24,6 @@ public class TableAction : MonoBehaviour
         {
             collider.enabled = false;
         }
-        GetComponent<Animator>().SetTrigger("tableScale");
     }
 
     private void OnDisable()
@@ -36,6 +35,11 @@ public class TableAction : MonoBehaviour
     void Update()
     {
         
+    }
+
+    public void OnPlaceTable()
+    {
+        GetComponent<Animator>().SetTrigger("tableScale");
     }
 
     public void OnTableScaleEnd()

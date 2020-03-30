@@ -61,6 +61,9 @@ public class GameManager : MonoBehaviour
         oldMaterials = table.transform.Find("table").GetComponent<Renderer>().materials;
         whiteBall = GameObject.FindGameObjectWithTag("WhiteBall");
         whiteBallPos = whiteBall.transform.position;
+
+        //transform.Find("table/white ball pos").gameObject.SetActive(false);
+        //transform.Find("table/balls pos").gameObject.SetActive(false);
     }
 
     // Update is called once per frame
@@ -201,6 +204,7 @@ public class GameManager : MonoBehaviour
     public void OnPlaceClick()
     {
         fsm.ChangeState(GameConst.GameState.Aim);
+        table.GetComponent<TableAction>().OnPlaceTable();
     }
 
     public void OnShowInspectClick()
@@ -219,6 +223,7 @@ public class GameManager : MonoBehaviour
         Debug.Log("FindPlace_Enter");
         GetComponent<ScaleAction>().enabled = true;
         GetComponent<LoadForceAction>().enabled = false;
+        table.GetComponent<TableAction>().enabled = true;
 
         // 设置特殊材质
         table.transform.Find("table").GetComponent<Renderer>().materials = tableSpMaterials;
@@ -228,7 +233,6 @@ void FindPlace_Exit()
     {
         Debug.Log("FindPlace_Exit");
         GetComponent<ScaleAction>().enabled = false;
-        table.GetComponent<TableAction>().enabled = true;
         //Pose pose = new Pose(table.transform.position, table.transform.rotation);
         //environmentProbeManager.AddEnvironmentProbe(pose, Vector3.one, Vector3.one*3);
 
