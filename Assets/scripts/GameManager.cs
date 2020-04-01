@@ -100,6 +100,7 @@ public class GameManager : MonoBehaviour
     {
         while(fsm.State == GameConst.GameState.FindPlace)
         {
+            table.transform.rotation = Quaternion.Euler(table.transform.rotation.eulerAngles.x, Camera.main.transform.rotation.eulerAngles.y, table.transform.rotation.eulerAngles.x);
             Vector2 center = Camera.main.ViewportToScreenPoint(new Vector3(0.5f, 0.5f, 0));
             if (raycastManager.Raycast(center, arRaycastHits, TrackableType.Planes))
             {
@@ -191,14 +192,6 @@ public class GameManager : MonoBehaviour
         currentScale += scaleDelta;
         currentScale = Mathf.Clamp(currentScale, 0.5f, 1.5f);
         table.transform.localScale = new Vector3(currentScale, currentScale, currentScale);
-    }
-
-    // percent: 0 - 100
-    public void OnLoadForce(float sliderValue)
-    {
-        float percent = sliderValue / 100f;
-        whiteBall.GetComponent<Rigidbody>().AddForce(new Vector3(percent * maxForce, 0, percent * maxForce));
-        fsm.ChangeState(GameConst.GameState.Rolling);
     }
 
     public void OnPlaceClick()
@@ -297,8 +290,8 @@ void FindPlace_Exit()
 
     public void OnHitClick(float value)
     {
-        int maxForce = 300;
-        whiteBall.GetComponent<Rigidbody>().AddForce(whiteBallForward * maxForce * value);
+        int maxForce = 100;
+        whiteBall.GetComponent<Rigidbody>().AddForce(whiteBallForward.normalized * maxForce * value);
         fsm.ChangeState(GameConst.GameState.Rolling);
     }
 
