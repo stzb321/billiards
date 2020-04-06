@@ -32,7 +32,7 @@ public class ReflectLine : MonoBehaviour
 
     private void OnEnable()
     {
-        ClearAllLine();
+        //ClearAllLine();
     }
 
     private void OnDisable()

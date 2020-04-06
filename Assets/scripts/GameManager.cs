@@ -29,6 +29,7 @@ public class GameManager : MonoBehaviour
     public Vector3 whiteBallForward;
     private GameObject refGO;
     public GameObject stick;
+    public GameObject aimGo;
 
     private float currentScale = 1;
     private float scaleFactor = 100;
@@ -57,19 +58,10 @@ public class GameManager : MonoBehaviour
     void InitModel()
     {
         table = Instantiate(model);
-        table.transform.position = new Vector3(999, 999, 999);
+        //table.transform.position = new Vector3(999, 999, 999);
         oldMaterials = table.transform.Find("table").GetComponent<Renderer>().materials;
         whiteBall = GameObject.FindGameObjectWithTag("WhiteBall");
         whiteBallPos = whiteBall.transform.position;
-
-        //transform.Find("table/white ball pos").gameObject.SetActive(false);
-        //transform.Find("table/balls pos").gameObject.SetActive(false);
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 
     IEnumerator GameLoop()
@@ -100,11 +92,14 @@ public class GameManager : MonoBehaviour
     {
         while(fsm.State == GameConst.GameState.FindPlace)
         {
+            table.transform.rotation = Quaternion.Euler(table.transform.rotation.eulerAngles.x, Camera.main.transform.rotation.eulerAngles.y, table.transform.rotation.eulerAngles.x);
             Vector2 center = Camera.main.ViewportToScreenPoint(new Vector3(0.5f, 0.5f, 0));
             if (raycastManager.Raycast(center, arRaycastHits, TrackableType.Planes))
             {
                 ARRaycastHit hit = arRaycastHits[0];
-                Vector3 pos = new Vector3(hit.pose.position.x, hit.pose.position.y, Mathf.Clamp(hit.pose.position.z - Camera.main.transform.position.z, -tableMaxDistance, tableMaxDistance));
+                Vector3 pos = new Vector3(hit.pose.position.x, hit.pose.position.y, hit.pose.position.z);
+                //Vector3 pos = new Vector3(Mathf.Clamp(hit.pose.position.x - Camera.main.transform.position.x, -tableMaxDistance, tableMaxDistance) + Camera.main.transform.position.x, hit.pose.position.y, hit.pose.position.z);
+
                 table.transform.position = pos;
             }
 
@@ -116,12 +111,6 @@ public class GameManager : MonoBehaviour
     {
         while (fsm.State == GameConst.GameState.Aim)
         {
-            //RaycastHit hitInfo;
-            //if(Physics.BoxCast(Camera.main.transform.position, boxSize, Camera.main.transform.forward))
-            //{
-
-            //}
-
             int cnt = Physics.BoxCastNonAlloc(Camera.main.transform.position, boxSize, Camera.main.transform.forward, raycastHits);
             for (int i = 0; i < cnt; i++)
             {
@@ -132,27 +121,19 @@ public class GameManager : MonoBehaviour
                 }
             }
 
-            //if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hitInfo))
-            //{
-            //    if(hitInfo.collider.gameObject.name == "whiteball")
-            //    {
-            //        fsm.ChangeState(GameConst.GameState.LoadForce);
-            //    }
-            //}
-
-
-
             yield return new WaitForSeconds(0.1f);
         }
         yield return null;
     }
 
+    [System.Obsolete]
     IEnumerator LoadForce()
     {
         while(fsm.State == GameConst.GameState.LoadForce)
         {
-            //whiteBallForward = Camera.main.transform.forward;
-            whiteBallForward.y = Camera.main.transform.forward.y;
+            whiteBallForward = Camera.main.transform.forward;
+            whiteBallForward.y = 0;
+
             stick.transform.forward = whiteBallForward;
             stick.transform.Rotate(new Vector3(6, 0, 0));
             yield return null;
@@ -193,18 +174,10 @@ public class GameManager : MonoBehaviour
         table.transform.localScale = new Vector3(currentScale, currentScale, currentScale);
     }
 
-    // percent: 0 - 100
-    public void OnLoadForce(float sliderValue)
-    {
-        float percent = sliderValue / 100f;
-        whiteBall.GetComponent<Rigidbody>().AddForce(new Vector3(percent * maxForce, 0, percent * maxForce));
-        fsm.ChangeState(GameConst.GameState.Rolling);
-    }
-
     public void OnPlaceClick()
     {
         fsm.ChangeState(GameConst.GameState.Aim);
-        table.GetComponent<TableAction>().OnPlaceTable();
+        table.transform.Find("table").GetComponent<TableAction>().OnPlaceTable();
     }
 
     public void OnShowInspectClick()
@@ -223,7 +196,7 @@ public class GameManager : MonoBehaviour
         Debug.Log("FindPlace_Enter");
         GetComponent<ScaleAction>().enabled = true;
         GetComponent<LoadForceAction>().enabled = false;
-        table.GetComponent<TableAction>().enabled = true;
+        table.transform.Find("table").GetComponent<TableAction>().enabled = true;
 
         // 设置特殊材质
         table.transform.Find("table").GetComponent<Renderer>().materials = tableSpMaterials;
@@ -244,14 +217,16 @@ void FindPlace_Exit()
     void Aim_Enter()
     {
         Debug.Log("Aim_Enter");
+        aimGo.SetActive(true);
     }
 
     void Aim_Exit()
     {
         Debug.Log("Aim_Exit");
-        whiteBallForward =  whiteBall.transform.position - refGO.transform.position;
+        whiteBallForward =  whiteBall.transform.position - Camera.main.transform.position;
         whiteBallForward.y = 0;
         originForward = whiteBallForward;
+        aimGo.SetActive(false);
     }
 
     void LoadForce_Enter()
@@ -297,8 +272,8 @@ void FindPlace_Exit()
 
     public void OnHitClick(float value)
     {
-        int maxForce = 300;
-        whiteBall.GetComponent<Rigidbody>().AddForce(whiteBallForward * maxForce * value);
+        int maxForce = 10000;
+        whiteBall.GetComponent<Rigidbody>().AddForce(whiteBallForward.normalized * maxForce * value);
         fsm.ChangeState(GameConst.GameState.Rolling);
     }
 
