@@ -40,7 +40,7 @@ public class ScaleAction : MonoBehaviour
             float distance = (finger1.position - finger2.position).magnitude;
             float delta = preDistance == 0 ? 0 : distance - preDistance;
 
-            //Debug.Log(string.Format("two finger moved!!  {0}", delta));
+            Debug.Log(string.Format("two finger moved!!  {0}", delta));
             gameManager.OnScale(delta);
 
             preDistance = distance;

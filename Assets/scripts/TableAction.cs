@@ -10,8 +10,8 @@ public class TableAction : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        whiteBallPos = transform.Find("table/white ball pos").gameObject;
-        ballsPos = transform.Find("table/balls pos").gameObject;
+        whiteBallPos = transform.Find("white ball pos").gameObject;
+        ballsPos = transform.Find("balls pos").gameObject;
 
         whiteBallPos.SetActive(false);
         ballsPos.SetActive(false);

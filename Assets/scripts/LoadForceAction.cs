@@ -26,6 +26,7 @@ public class LoadForceAction : MonoBehaviour
         hit = false;
         UIObject?.SetActive(true);
         realStick.SetActive(true);
+        originStickPos = realStick.transform.localPosition;
     }
 
     private void OnDisable()
@@ -74,7 +75,7 @@ public class LoadForceAction : MonoBehaviour
     {
         if (!hit)
         {
-            realStick.transform.localPosition = (-realStick.transform.forward * maxDistance * slider.value) + originStickPos;
+            realStick.transform.localPosition = (-realStick.transform.forward * maxDistance * slider.value) + gameManager.whiteBall.transform.position;
         }
     }
 
@@ -82,7 +83,7 @@ public class LoadForceAction : MonoBehaviour
     {
         hit = true;
         float val = slider.value;
-        realStick.transform.DOLocalMove(originStickPos, 0.1f).onComplete = ()=>
+        realStick.transform.DOLocalMove(gameManager.whiteBall.transform.position, 0.1f).onComplete = ()=>
         {
             gameManager.OnHitClick(val);
         };
