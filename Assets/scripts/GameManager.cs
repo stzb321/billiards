@@ -272,7 +272,7 @@ void FindPlace_Exit()
 
     public void OnHitClick(float value)
     {
-        int maxForce = 10000;
+        int maxForce = 11000;
         whiteBall.GetComponent<Rigidbody>().AddForce(whiteBallForward.normalized * maxForce * value);
         fsm.ChangeState(GameConst.GameState.Rolling);
     }
