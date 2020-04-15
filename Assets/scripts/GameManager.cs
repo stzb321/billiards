@@ -27,7 +27,6 @@ public class GameManager : MonoBehaviour
     private Vector3 originForward;
     [HideInInspector]
     public Vector3 whiteBallForward;
-    private GameObject refGO;
     public GameObject stick;
     public GameObject aimGo;
 
@@ -48,7 +47,6 @@ public class GameManager : MonoBehaviour
         environmentProbeManager = GetComponent<AREnvironmentProbeManager>();
         arRaycastHits = new List<ARRaycastHit>();
         raycastHits = new RaycastHit[10];
-        refGO = GameObject.Find("ref");
 
         InitModel();
 
@@ -115,7 +113,7 @@ public class GameManager : MonoBehaviour
             for (int i = 0; i < cnt; i++)
             {
                 var hitInfo = raycastHits[i];
-                if (hitInfo.collider.gameObject.name == "whiteball")
+                if (hitInfo.collider.gameObject.tag == GameConst.BallsTag.WhiteBall)
                 {
                     fsm.ChangeState(GameConst.GameState.LoadForce);
                 }
@@ -126,7 +124,6 @@ public class GameManager : MonoBehaviour
         yield return null;
     }
 
-    [System.Obsolete]
     IEnumerator LoadForce()
     {
         while(fsm.State == GameConst.GameState.LoadForce)
@@ -135,7 +132,7 @@ public class GameManager : MonoBehaviour
             whiteBallForward.y = 0;
 
             stick.transform.forward = whiteBallForward;
-            stick.transform.Rotate(new Vector3(6, 0, 0));
+            stick.transform.Rotate(new Vector3(6, 0, 0));   //往上斜一点
             yield return null;
         }
 
@@ -170,20 +167,33 @@ public class GameManager : MonoBehaviour
     {
         float scaleDelta = delta / scaleFactor;
         currentScale += scaleDelta;
-        currentScale = Mathf.Clamp(currentScale, 0.5f, 1.5f);
+        currentScale = Mathf.Clamp(currentScale, 0.5f, 2.5f);
         table.transform.localScale = new Vector3(currentScale, currentScale, currentScale);
     }
 
     public void OnPlaceClick()
     {
         fsm.ChangeState(GameConst.GameState.Aim);
-        table.transform.Find("table").GetComponent<TableAction>().OnPlaceTable();
+        table.transform.Find("table").GetComponent<TableEnterAction>().OnPlaceTable();
     }
 
     public void OnShowInspectClick()
     {
         debugHir.SetActive(!debugHir.activeSelf);
         debugInspector.SetActive(!debugInspector.activeSelf);
+    }
+
+    void ApplyForce(Vector3 force)
+    {
+        StartCoroutine(ApplyForceAtFixedUpdate(force));
+    }
+
+    IEnumerator ApplyForceAtFixedUpdate(Vector3 force)
+    {
+        yield return new WaitForFixedUpdate();
+
+        whiteBall.GetComponent<Rigidbody>().AddForce(force);
+        fsm.ChangeState(GameConst.GameState.Rolling);
     }
 
 
@@ -196,7 +206,7 @@ public class GameManager : MonoBehaviour
         Debug.Log("FindPlace_Enter");
         GetComponent<ScaleAction>().enabled = true;
         GetComponent<LoadForceAction>().enabled = false;
-        table.transform.Find("table").GetComponent<TableAction>().enabled = true;
+        table.transform.Find("table").GetComponent<TableEnterAction>().enabled = true;
 
         // 设置特殊材质
         table.transform.Find("table").GetComponent<Renderer>().materials = tableSpMaterials;
@@ -234,8 +244,6 @@ void FindPlace_Exit()
         Debug.Log("LoadForce_Enter");
         GetComponent<ReflectLine>().enabled = true;
         GetComponent<LoadForceAction>().enabled = true;
-        //stick.transform.forward = whiteBallForward;
-        //stick.transform.Rotate(new Vector3(6, 0, 0));
         stick.transform.position = whiteBall.transform.position;
     }
 
@@ -257,10 +265,11 @@ void FindPlace_Exit()
         
     }
 
-    //////////////////////////////////////state functions////////////////////////////
+    //////////////////////////////////////state functions end////////////////////////////
     public void TestHit()
     {
-        whiteBall.GetComponent<Rigidbody>().AddForce(new Vector3(1, 0, 1) * 10);
+        ApplyForce(new Vector3(1, 0, 1) * 10);
+        //whiteBall.GetComponent<Rigidbody>().AddForce(new Vector3(1, 0, 1) * 10);
     }
 
     public void OnRotateBallStick(Slider slider)
@@ -273,8 +282,8 @@ void FindPlace_Exit()
     public void OnHitClick(float value)
     {
         int maxForce = 11000;
-        whiteBall.GetComponent<Rigidbody>().AddForce(whiteBallForward.normalized * maxForce * value);
-        fsm.ChangeState(GameConst.GameState.Rolling);
+        ApplyForce(whiteBallForward.normalized * maxForce * value);
+        //whiteBall.GetComponent<Rigidbody>().AddForce(whiteBallForward.normalized * maxForce * value);
     }
 
     public void NextState()

@@ -9,7 +9,6 @@ public class LoadForceAction : MonoBehaviour
     public GameObject UIObject;
     public GameObject realStick;
     public Slider forceSlider;
-    private Vector3 originStickPos;
     private float minForce = 2f;
     private float sliderFactor = 0.3f;
     private float maxDistance = 10;
@@ -18,7 +17,7 @@ public class LoadForceAction : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        originStickPos = realStick.transform.localPosition;
+        
     }
 
     private void OnEnable()
@@ -26,7 +25,6 @@ public class LoadForceAction : MonoBehaviour
         hit = false;
         UIObject?.SetActive(true);
         realStick.SetActive(true);
-        originStickPos = realStick.transform.localPosition;
     }
 
     private void OnDisable()
